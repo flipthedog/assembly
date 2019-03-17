@@ -181,7 +181,6 @@ int oddBits(void) {
     	 int k = i | j;
     	 int l = k << 16;
     	 int m = k | l;
-
   return m;
 }
 /*
@@ -192,16 +191,9 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-	int i = (x >> 1) & 1;
-	while (!i) {
-		i = (x >> i) & 1;
-		i++;
-		if (i == 31){
-			return 1;
-		}
-	}
-	return 0;
+	return !(x ^ 0x80000000);
 }
+
 /* 
  * bitXor - x^y using only ~ and & 
  *   Example: bitXor(4, 5) = 1
@@ -210,8 +202,10 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  return 2;
+	return ~(~(x & ~(x & y)) & ~(~(x & y) & y));
+	//return (x & ~y) | (~x & y);
 }
+
 /* 
  * conditional - same as x ? y : z 
  *   Example: conditional(2,4,5) = 4
@@ -220,7 +214,9 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+	// change this later, why does ~0 work but not 1
+	return (((!x) + ~0) & y) | ( ~((!x) + ~0) & z);
+	// return ((!(!!x)) | y) | ((~(~x) >> 1) | z);
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -231,7 +227,8 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+
+	return 2;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30

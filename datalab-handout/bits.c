@@ -174,7 +174,15 @@ NOTES:
  *   Rating: 2
  */
 int oddBits(void) {
-  return 2;
+    	 // return 32 bits, only odd 0xAAAAAAAA
+    	 //int x = 0x010101010101;
+    	 int i = 0xAA;
+    	 int j = i << 8;
+    	 int k = i | j;
+    	 int l = k << 16;
+    	 int m = k | l;
+
+  return m;
 }
 /*
  * isTmin - returns 1 if x is the minimum, two's complement number,
@@ -184,7 +192,15 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-  return 2;
+	int i = (x >> 1) & 1;
+	while (!i) {
+		i = (x >> i) & 1;
+		i++;
+		if (i == 31){
+			return 1;
+		}
+	}
+	return 0;
 }
 /* 
  * bitXor - x^y using only ~ and & 

@@ -1,4 +1,4 @@
-// #include <stdio.h>
+#include <stdio.h>
 /* 
  * CS:APP Data Lab 
  * 
@@ -321,7 +321,14 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+//	printf("Input: %d \n", x);
+	int zero = 0x30;
+	int nine = 0x39;
+	int sign_x = (x >> 31) & 1;
+	int difference_nine = !((nine + (~x + 1)) >> 31) & 1;
+	int difference_zero = ((zero + (~x)) >> 31) & 1;
+//	printf("diff_nine: %d, diff_zero: %d \n", difference_nine, difference_zero);
+	return difference_nine & difference_zero;
 }
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,

@@ -1,3 +1,4 @@
+// #include <stdio.h>
 /* 
  * CS:APP Data Lab 
  * 
@@ -271,8 +272,8 @@ int satMul2(int x) {
 	int sign = (original >> 31);
 	int overflow = (new >> 31) ^ (original >> 31);
 	int ones = ~0;
-	int zero = !zero;
-	int t_max = (ones >> 31);
+	int zero = !ones;
+	//int t_max = (ones >> 31);
 	return (((x) << 1) & !overflow) & (overflow & ((sign) & ((zero))));
 }
 /* 
@@ -283,7 +284,32 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-  return 2;
+//	printf("Input: x: %d y: %d \n", x, y);
+//	int sign_x = (x >> 31) & 1;
+//	int sign_y = (y >> 31) & 1;
+//	printf("sign_x: %d, sign_y: %d \n", sign_x, sign_y);
+//	int diff_signs = sign_x ^ sign_y;
+//	int both_negative = sign_x & sign_y;
+//	printf("Both_neg: %d", both_negative);
+//	// Have the same sign, so take difference
+//	int diff = ((y + (~x + 1)) & ~(diff_signs) ) & ~(both_negative);
+//
+//	int neg_diff = ((~y + x) & both_negative);
+//
+//	int choose_diff = diff | neg_diff;
+//
+//	printf("Diff: %d \n", diff);
+//	printf("neg_diff: %d \n", neg_diff);
+//	int result = ((choose_diff >> 31) & 1) | ((sign_x + ~(sign_y)) & diff_signs); // check the sign bit
+//	return result;
+
+	int sign_x = (x >> 31) & 1;
+	int sign_y = (y >> 31) & 1;
+	int diff_signs = sign_x ^ sign_y;
+	int different_signs = (diff_signs) & (x >> 31);
+	int difference = !((y + (~x)) >> 31);
+	int same_signs = (!(diff_signs)) & difference;
+	return same_signs | different_signs;
 }
 /* 
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')

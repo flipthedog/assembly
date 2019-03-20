@@ -239,8 +239,12 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+	int neg_sign = (x >> 31);
+	int power_add = (~0 + (1 << n));
+	return ((neg_sign & power_add) + x) >> n;
+	//return ((x >> n) + (((x >> 31) & 1) & (n >> 1))) - (((n >> 1)));
 }
+
 /* 
  * isNonNegative - return 1 if x >= 0, return 0 otherwise 
  *   Example: isNonNegative(-1) = 0.  isNonNegative(0) = 1.
@@ -249,7 +253,7 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  return 2;
+  return !(x >> 31);
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow

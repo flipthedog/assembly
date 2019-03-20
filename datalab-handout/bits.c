@@ -265,7 +265,15 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-  return 2;
+	// how to create tmax and tmin
+	int original = x;
+	int new = (x << 1);
+	int sign = (original >> 31);
+	int overflow = (new >> 31) ^ (original >> 31);
+	int ones = ~0;
+	int zero = !zero;
+	int t_max = (ones >> 31);
+	return (((x) << 1) & !overflow) & (overflow & ((sign) & ((zero))));
 }
 /* 
  * isLess - if x < y  then return 1, else return 0 

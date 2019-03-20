@@ -266,15 +266,20 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
+//	printf("Input: %d \n", x);
 	// how to create tmax and tmin
 	int original = x;
 	int new = (x << 1);
 	int sign = (original >> 31);
 	int overflow = (new >> 31) ^ (original >> 31);
-	int ones = ~0;
-	int zero = !ones;
-	//int t_max = (ones >> 31);
-	return (((x) << 1) & !overflow) & (overflow & ((sign) & ((zero))));
+	int tmax = ~(1 << 31);
+	int tmin = ~tmax;
+
+//	printf("tmax: %d, tmin: %d \n", tmax, tmin);
+	int return_min = (sign) & tmin;
+	int return_max = ~(sign) & tmax;
+
+	return ((new) & ~overflow) | (overflow & (return_min | return_max));
 }
 /* 
  * isLess - if x < y  then return 1, else return 0 
@@ -324,7 +329,6 @@ int isAsciiDigit(int x) {
 //	printf("Input: %d \n", x);
 	int zero = 0x30;
 	int nine = 0x39;
-	int sign_x = (x >> 31) & 1;
 	int difference_nine = !((nine + (~x + 1)) >> 31) & 1;
 	int difference_zero = ((zero + (~x)) >> 31) & 1;
 //	printf("diff_nine: %d, diff_zero: %d \n", difference_nine, difference_zero);

@@ -192,7 +192,8 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-	return !(x ^ 0x80000000);
+	int tmin = (1 << 31);
+	return !(x ^ tmin);
 }
 
 /* 
@@ -388,8 +389,23 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
+	printf("\n ---------- \nInput: %d \n", x);
+	int n = 0;
+	n += ( (!!(x >> 2)) << 1);
+	n += ( (!!(x >> 4)) << 2);
+	n += ( (!!(x >> 8)) << 3);
+	n += ( (!!(x >> 16)) << 4);
 
-    return 2;
+
+	int m = ((!!(x >> 1)));
+	int two = 0x2;
+	int isTwo = !(x ^ two);
+
+	printf("n: %d \n", n);
+	printf("m: %d \n", m);
+	printf("isTwo: %d \n", isTwo);
+
+    return (n & ~(isTwo)) | (m & (isTwo));
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -403,7 +419,9 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+	int frac = ();
+
+	return 2;
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x

@@ -228,8 +228,28 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
+	//printf("\n\n ----------");
+	//printf("Input: %d \n", x);
+	x |= x >> 16;
+	x |= x >> 8;
 
-	return 2;
+	x |= x >> 4;
+	x |= x >> 2;
+	x |= x >> 1;
+
+	int overflow = (x >> 31);
+
+	//printf("Shifted x: %d \n", x);
+	x = x + 1;
+
+
+	int one = 0x01;
+	one = one << 31;
+
+	//printf("overflow: %d \n", overflow);
+	//printf("one: %d \n", one);
+
+	return (~one & (x >> 1)) | (one & overflow);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -346,7 +366,19 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-  return 2;
+	printf("Input: %d \n", x);
+	int tmax = ~(1 << 31);
+	int tmin = ~tmax;
+	int half = (x >> 1);
+	int overflow_risk = (((x + 1) >> 31) ^ (x >> 31)) & 1;
+	printf("Overflow risk: %d \n", overflow_risk);
+	int fourth = (~(overflow_risk) & ((x + 1) >> 2)) | ((overflow_risk) & (x >> 2));
+	printf("half: %d, Fourth: %d \n", half, fourth);
+
+	int divide = half + fourth;
+	//int multiply = (divide << 1) + divide;
+
+	return divide;
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -356,7 +388,8 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+
+    return 2;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for

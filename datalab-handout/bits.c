@@ -368,8 +368,7 @@ int isAsciiDigit(int x) {
 int trueThreeFourths(int x)
 {
 	printf("Input: %d \n", x);
-	int tmax = ~(1 << 31);
-	int tmin = ~tmax;
+
 	int half = (x >> 1);
 	int overflow_risk = (((x + 1) >> 31) ^ (x >> 31)) & 1;
 	printf("Overflow risk: %d \n", overflow_risk);
@@ -420,14 +419,12 @@ int ilog2(int x) {
  */
 unsigned float_neg(unsigned uf) {
 	//printf("Input: %d \n", uf);
-	int frac = ((1 << 23) - 1) & uf;
 	int exp = 0x7F800000;
 	int m = uf & 0x7FFFFF;
-	int sign_bit = (uf & ( 1 << 31)) >> 31;
 	// unsigned new_uf = (uf & ( ~(1 << 31))) | ( ~(sign_bit) >> 31);
 	unsigned new_uf = (uf ^ (1 << (31)));
 
-	if ((exp & uf) == exp && m){
+	if (((exp & uf) == exp) && m){
 		return uf;
 	}
 
@@ -447,7 +444,57 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+
+	//printf("Input: %d \n", x);
+
+	int neg_int = 0x80000000;
+
+	//printf("sign_bit: %d \n", sign_bit);
+
+	//int power_add = (~0 + (1 << n));
+	//int power = ((neg_sign & power_add) + x) >> n;
+
+	// If integer is 0, return 0 for floating point value
+	if (x == 0x00000000){
+		//printf("Avoided \n");
+		return 0x00000000;
+	}
+
+	unsigned sign_bit = 0;
+	if (x & neg_int) {
+			sign_bit = neg_int;
+			x = -x;
+			//printf("Avoided2 \n");
+	}
+
+	unsigned temp_exp = 31; // The highest possible exponent
+
+	// if integer is max
+	while (1){
+		if (x & neg_int){
+			break;
+		}
+		temp_exp = temp_exp - 1;
+		x = x << 1;
+	}
+
+	unsigned carry = 0;
+
+	// Check for carry over
+	if ((x & 0xFF) > 0x80)  {
+		carry = 1;
+	} else if ((x & 0x000001ff) == 0x180) {
+		carry = 1;
+	}
+
+	unsigned exponent = ((temp_exp + 127) << 23);
+
+	unsigned mantissa = ((x & 0x7fffffffu) >> 8) + carry;
+
+	//printf("carry: %d \n", carry);
+	//printf("exponent: %d \n", exponent);
+
+	return sign_bit + exponent + mantissa;
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for

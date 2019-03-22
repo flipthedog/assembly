@@ -176,14 +176,20 @@ NOTES:
  */
 int oddBits(void) {
     	 // return 32 bits, only odd 0xAAAAAAAA
-    	 //int x = 0x010101010101;
+
+    	 // Define first section of oddbits
     	 int i = 0xAA;
+    	 // Move left to form 16 bit integer
     	 int j = i << 8;
+    	 // OR with previous first section to form 16 odd bits
     	 int k = i | j;
+    	 // Move left to form 32 bit integer
     	 int l = k << 16;
+    	 // OR with previous 16-bit section to form 32 odd bits
     	 int m = k | l;
   return m;
 }
+
 /*
  * isTmin - returns 1 if x is the minimum, two's complement number,
  *     and 0 otherwise 
@@ -192,8 +198,12 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x) {
-	int tmin = (1 << 31);
-	return !(x ^ tmin);
+	// Check that adding 1 to the inverse of x equals tmin
+	// ~Tmin + 1 = Tmin
+	int is_same = x ^ (~x + 1);
+
+	// Check to ensure that 0x0 does not toggle 1
+	return !(is_same + !x);
 }
 
 /* 
@@ -204,6 +214,11 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
+	// Create a XOR gate out of NOT and AND
+	// A & ~B | ~A & B
+	// NAND XOR Formula from Wikipedia:
+	// A XOR B = (A NAND (A NAND B)) NAND (B NAND (A NAND B))
+
 	return ~(~(x & ~(x & y)) & ~(~(x & y) & y));
 	//return (x & ~y) | (~x & y);
 }
@@ -216,7 +231,8 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-	// change this later, why does ~0 work but not 1
+	// Return z if x == 0, return z otherwise
+
 	return (((!x) + ~0) & y) | ( ~((!x) + ~0) & z);
 	// return ((!(!!x)) | y) | ((~(~x) >> 1) | z);
 }
@@ -229,8 +245,8 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-	//printf("\n\n ----------");
-	//printf("Input: %d \n", x);
+
+	// Fill up all the bits to the right of MSB
 	x |= x >> 16;
 	x |= x >> 8;
 
@@ -238,15 +254,18 @@ int greatestBitPos(int x) {
 	x |= x >> 2;
 	x |= x >> 1;
 
+
 	int overflow = (x >> 31);
 
-	//printf("Shifted x: %d \n", x);
 	x = x + 1;
-
 
 	int one = 0x01;
 	one = one << 31;
 
+	// Debugging Print Statements
+	//printf("\n\n ----------");
+	//printf("Input: %d \n", x);
+	//printf("Shifted x: %d \n", x);
 	//printf("overflow: %d \n", overflow);
 	//printf("one: %d \n", one);
 
@@ -367,18 +386,37 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-	printf("Input: %d \n", x);
+	// FIX
+	//printf("------------- \nInput: %d \n", x);
 
-	int half = (x >> 1);
-	int overflow_risk = (((x + 1) >> 31) ^ (x >> 31)) & 1;
-	printf("Overflow risk: %d \n", overflow_risk);
-	int fourth = (~(overflow_risk) & ((x + 1) >> 2)) | ((overflow_risk) & (x >> 2));
-	printf("half: %d, Fourth: %d \n", half, fourth);
 
-	int divide = half + fourth;
-	//int multiply = (divide << 1) + divide;
+	int sign_bit = (x >> 31) & 1;
+	int invert = (~sign_bit) + 1;
+	x = (x ^ invert) + sign_bit;
 
-	return divide;
+
+	//printf("sign_bit: %d \n", sign_bit);
+
+	//printf("New x?: %d \n", x);
+
+
+	//int overflow_risk = ( !!((x + 1) >> 31) ^ !!(x >> 31)) & 1;
+
+	//printf("Overflow risk: %d \n", overflow_risk);
+
+	//int fourth = (~(overflow_risk) & ((x + 1) >> 2)) | ((overflow_risk) & (x >> 2));
+	int fourth = (x >> 2) &  ~(3 << 30);
+	int three_fourths = fourth + fourth + fourth;
+	//printf("half: %d, Fourth: %d \n", half, fourth);
+
+	int shifted_bits = x & 0x3;
+	int extra = shifted_bits + shifted_bits + shifted_bits;
+	int rem = (extra >> 2) &  ~(3 << 30);
+
+	//printf("Shifted_bits: %d \n", shifted_bits);
+	int final = three_fourths + rem;
+
+	return (final ^ invert) + sign_bit;
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -388,23 +426,30 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
-	printf("\n ---------- \nInput: %d \n", x);
+	// Log2 in binary is the position of the MSB - 1
+
 	int n = 0;
-	n += ( (!!(x >> 2)) << 1);
-	n += ( (!!(x >> 4)) << 2);
-	n += ( (!!(x >> 8)) << 3);
-	n += ( (!!(x >> 16)) << 4);
 
+	// Check most significant 16-bits first
+	int check = ( (!!(x >> 16)) << 31 >> 31);
+	n += check & 16;
+	x = x >> (check & 16);
 
-	int m = ((!!(x >> 1)));
-	int two = 0x2;
-	int isTwo = !(x ^ two);
+	check = ( (!!(x >> 8)) << 31 >> 31);
+	n += check & 8;
+	x = x >> (check & 8);
 
-	printf("n: %d \n", n);
-	printf("m: %d \n", m);
-	printf("isTwo: %d \n", isTwo);
+	check = ( (!!(x >> 4)) << 31 >> 31);
+	n += check & 4;
+	x = x >> (check & 4);
 
-    return (n & ~(isTwo)) | (m & (isTwo));
+	check = ( (!!(x >> 2)) << 31 >> 31);
+	n += check & 2;
+	x = x >> (check & 2);
+
+	check = ( (!!(x >> 1)) << 31 >> 31);
+	n += check & 1;
+	return n;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -508,5 +553,20 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+
+	int neg_int = 0x80000000;
+
+	if (uf == neg_int || uf == 0){
+		return uf;
+	}
+
+	unsigned overflow_risk = (!((uf>>23)&0xff));
+
+	if (((uf >> 23) & 0xFF) == 0xFF){
+		return uf;
+	} else if (overflow_risk) {
+		return (uf & (1 << 31)) | (uf << 1);
+	}
+
+	return uf + (1 << 23);
 }

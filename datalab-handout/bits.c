@@ -419,9 +419,23 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
-	int frac = ();
+	//printf("Input: %d \n", uf);
+	int frac = ((1 << 23) - 1) & uf;
+	int exp = 0x7F800000;
+	int m = uf & 0x7FFFFF;
+	int sign_bit = (uf & ( 1 << 31)) >> 31;
+	// unsigned new_uf = (uf & ( ~(1 << 31))) | ( ~(sign_bit) >> 31);
+	unsigned new_uf = (uf ^ (1 << (31)));
 
-	return 2;
+	if ((exp & uf) == exp && m){
+		return uf;
+	}
+
+	//unsigned new_uf = (uf | (~sign_bit << 31));
+	//printf("sign_bit: %d \n", sign_bit);
+
+	return new_uf;
+
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x

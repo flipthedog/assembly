@@ -1,4 +1,4 @@
-#include <stdio.h>
+// #include <stdio.h>
 /* 
  * CS:APP Data Lab 
  * 
@@ -187,6 +187,7 @@ int oddBits(void) {
     	 int l = k << 16;
     	 // OR with previous 16-bit section to form 32 odd bits
     	 int m = k | l;
+
   return m;
 }
 
@@ -220,7 +221,6 @@ int bitXor(int x, int y) {
 	// A XOR B = (A NAND (A NAND B)) NAND (B NAND (A NAND B))
 
 	return ~(~(x & ~(x & y)) & ~(~(x & y) & y));
-	//return (x & ~y) | (~x & y);
 }
 
 /* 
@@ -233,8 +233,9 @@ int bitXor(int x, int y) {
 int conditional(int x, int y, int z) {
 	// Return z if x == 0, return z otherwise
 
-	return (((!x) + ~0) & y) | ( ~((!x) + ~0) & z);
-	// return ((!(!!x)) | y) | ((~(~x) >> 1) | z);
+	int x_is_one = (!x) + ~0; // Test if x is one or not
+	// x_is_one == 1, return y, x_is_one == 0, return z
+	return ((x_is_one) & y) | ( ~(x_is_one) & z);
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -246,21 +247,24 @@ int conditional(int x, int y, int z) {
  */
 int greatestBitPos(int x) {
 
+	int overflow;
+	int one;
+
 	// Fill up all the bits to the right of MSB
 	x |= x >> 16;
 	x |= x >> 8;
-
 	x |= x >> 4;
 	x |= x >> 2;
 	x |= x >> 1;
 
+	// Check if there is risk of overflow
+	overflow = (x >> 31);
 
-	int overflow = (x >> 31);
-
+	// Increment with one to obtain the greatestBitPos Mask
 	x = x + 1;
 
-	int one = 0x01;
-	one = one << 31;
+	// Bit mask for highest bit case
+	one = 1 << 31;
 
 	// Debugging Print Statements
 	//printf("\n\n ----------");
@@ -269,6 +273,7 @@ int greatestBitPos(int x) {
 	//printf("overflow: %d \n", overflow);
 	//printf("one: %d \n", one);
 
+	// Return one if there is a risk of overflow, otherwise return x >> 1
 	return (~one & (x >> 1)) | (one & overflow);
 }
 /* 
@@ -280,10 +285,14 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
+	// Get the sign bit of the int
 	int neg_sign = (x >> 31);
-	int power_add = (~0 + (1 << n));
+
+	// Create a mask for the nth power
+	int power_add = ~0 + (1 << n);
+
+	// Add the mask to the original x, and shift it to n
 	return ((neg_sign & power_add) + x) >> n;
-	//return ((x >> n) + (((x >> 31) & 1) & (n >> 1))) - (((n >> 1)));
 }
 
 /* 
@@ -294,7 +303,11 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  return !(x >> 31);
+	// Return 1 if x is positive
+	// Return 0 if x is negative
+
+	// Get the sign bit and take the NOT
+	return !(x >> 31);
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
@@ -306,19 +319,24 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-//	printf("Input: %d \n", x);
-	// how to create tmax and tmin
-	int original = x;
-	int new = (x << 1);
-	int sign = (original >> 31);
-	int overflow = (new >> 31) ^ (original >> 31);
-	int tmax = ~(1 << 31);
-	int tmin = ~tmax;
 
-//	printf("tmax: %d, tmin: %d \n", tmax, tmin);
+	int original = x; // Copy the original int
+	int new = (x << 1); // Bit shift it left to multiply by 2
+	int sign = (original >> 31); // Copy sign
+	int overflow = (new >> 31) ^ (original >> 31); // Check if overflow occurred
+
+	int tmax = ~(1 << 31); // Set TMax
+	int tmin = ~tmax; // Set TMin
+
+	// Choose what to return
 	int return_min = (sign) & tmin;
 	int return_max = ~(sign) & tmax;
 
+	//	Debugging Print statements
+	//	printf("Input: %d \n", x);
+	//	printf("tmax: %d, tmin: %d \n", tmax, tmin);
+
+	// Return appropriate values and check for overflows
 	return ((new) & ~overflow) | (overflow & (return_min | return_max));
 }
 /* 
@@ -329,31 +347,22 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-//	printf("Input: x: %d y: %d \n", x, y);
-//	int sign_x = (x >> 31) & 1;
-//	int sign_y = (y >> 31) & 1;
-//	printf("sign_x: %d, sign_y: %d \n", sign_x, sign_y);
-//	int diff_signs = sign_x ^ sign_y;
-//	int both_negative = sign_x & sign_y;
-//	printf("Both_neg: %d", both_negative);
-//	// Have the same sign, so take difference
-//	int diff = ((y + (~x + 1)) & ~(diff_signs) ) & ~(both_negative);
-//
-//	int neg_diff = ((~y + x) & both_negative);
-//
-//	int choose_diff = diff | neg_diff;
-//
-//	printf("Diff: %d \n", diff);
-//	printf("neg_diff: %d \n", neg_diff);
-//	int result = ((choose_diff >> 31) & 1) | ((sign_x + ~(sign_y)) & diff_signs); // check the sign bit
-//	return result;
 
-	int sign_x = (x >> 31) & 1;
-	int sign_y = (y >> 31) & 1;
+	// Copy the signs
+	int sign_x = !!(x >> 31);
+	int sign_y = !!(y >> 31);
+
+	// Check if there are different signs
 	int diff_signs = sign_x ^ sign_y;
+
+	// Create return for if there are different signs
 	int different_signs = (diff_signs) & (x >> 31);
-	int difference = !((y + (~x)) >> 31);
+
+	int difference = !((y + (~x)) >> 31); // Figure out the difference between the two
+
+	// Figure out which one is smaller, they have the same sign
 	int same_signs = (!(diff_signs)) & difference;
+
 	return same_signs | different_signs;
 }
 /* 
@@ -366,12 +375,19 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-//	printf("Input: %d \n", x);
-	int zero = 0x30;
-	int nine = 0x39;
-	int difference_nine = !((nine + (~x + 1)) >> 31) & 1;
-	int difference_zero = ((zero + (~x)) >> 31) & 1;
-//	printf("diff_nine: %d, diff_zero: %d \n", difference_nine, difference_zero);
+
+	int zero = 0x30; // ASCII Code for 0
+	int nine = 0x39; // ASCII Code for 9
+
+	// Find the difference between the two ASCII codes
+	int difference_nine = !((nine + (~x + 1)) >> 31);
+	int difference_zero = !!((zero + (~x)) >> 31);
+
+	//	Debugging print statements
+	//	printf("Input: %d \n", x);
+	//	printf("diff_nine: %d, diff_zero: %d \n", difference_nine, difference_zero);
+
+	// Both have to be true in order for it to be between
 	return difference_nine & difference_zero;
 }
 /*
@@ -386,36 +402,43 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-	// FIX
-	//printf("------------- \nInput: %d \n", x);
+	int fourth;
+	int three_fourths;
+	int final;
+	int shifted_bits;
+	int extra;
+	int rem;
+	int checker;
 
-
+	// Take the absolute of x
 	int sign_bit = (x >> 31) & 1;
 	int invert = (~sign_bit) + 1;
 	x = (x ^ invert) + sign_bit;
 
+	checker = ~(3 << 30); // Create a mask for everything but the two greatest bits
+	fourth = (x >> 2) &  checker; // Take the fourth power
+	three_fourths = fourth + fourth + fourth; // three * 1/4 is three-fourths
 
+	// Find the bits that are lost due to the shift of two left
+	shifted_bits = x & 0x3;
+
+	// Multiple these two bits by three
+	extra = shifted_bits + shifted_bits + shifted_bits;
+
+	// divide them by 4 to get remainder
+	rem = (extra >> 2);
+
+	// Add remainder to original three-fourths
+	final = three_fourths + rem;
+
+	// Debugging print statements
+	//printf("------------- \nInput: %d \n", x);
 	//printf("sign_bit: %d \n", sign_bit);
-
 	//printf("New x?: %d \n", x);
-
-
-	//int overflow_risk = ( !!((x + 1) >> 31) ^ !!(x >> 31)) & 1;
-
-	//printf("Overflow risk: %d \n", overflow_risk);
-
-	//int fourth = (~(overflow_risk) & ((x + 1) >> 2)) | ((overflow_risk) & (x >> 2));
-	int fourth = (x >> 2) &  ~(3 << 30);
-	int three_fourths = fourth + fourth + fourth;
 	//printf("half: %d, Fourth: %d \n", half, fourth);
-
-	int shifted_bits = x & 0x3;
-	int extra = shifted_bits + shifted_bits + shifted_bits;
-	int rem = (extra >> 2) &  ~(3 << 30);
-
 	//printf("Shifted_bits: %d \n", shifted_bits);
-	int final = three_fourths + rem;
 
+	// Convert this to the 2's complement if necessary
 	return (final ^ invert) + sign_bit;
 }
 /*
@@ -426,12 +449,16 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
-	// Log2 in binary is the position of the MSB - 1
+	// Log base 2 in binary is the position of the MSB minus one
 
 	int n = 0;
 
+	// Binary search
+	// Check blocks of bits one at a time to find the greatest bit
+
 	// Check most significant 16-bits first
 	int check = ( (!!(x >> 16)) << 31 >> 31);
+	// If there is a bit in
 	n += check & 16;
 	x = x >> (check & 16);
 
@@ -493,7 +520,11 @@ unsigned float_i2f(int x) {
 	//printf("Input: %d \n", x);
 
 	int neg_int = 0x80000000;
-
+	unsigned sign_bit = 0;
+	unsigned temp_exp;
+	unsigned carry;
+	unsigned exponent;
+	unsigned mantissa;
 	//printf("sign_bit: %d \n", sign_bit);
 
 	//int power_add = (~0 + (1 << n));
@@ -505,14 +536,13 @@ unsigned float_i2f(int x) {
 		return 0x00000000;
 	}
 
-	unsigned sign_bit = 0;
 	if (x & neg_int) {
 			sign_bit = neg_int;
 			x = -x;
 			//printf("Avoided2 \n");
 	}
 
-	unsigned temp_exp = 31; // The highest possible exponent
+	temp_exp = 31; // The highest possible exponent
 
 	// if integer is max
 	while (1){
@@ -523,7 +553,7 @@ unsigned float_i2f(int x) {
 		x = x << 1;
 	}
 
-	unsigned carry = 0;
+	carry = 0;
 
 	// Check for carry over
 	if ((x & 0xFF) > 0x80)  {
@@ -532,9 +562,9 @@ unsigned float_i2f(int x) {
 		carry = 1;
 	}
 
-	unsigned exponent = ((temp_exp + 127) << 23);
+	exponent = ((temp_exp + 127) << 23);
 
-	unsigned mantissa = ((x & 0x7fffffffu) >> 8) + carry;
+	mantissa = ((x & 0x7fffffffu) >> 8) + carry;
 
 	//printf("carry: %d \n", carry);
 	//printf("exponent: %d \n", exponent);
@@ -555,12 +585,12 @@ unsigned float_i2f(int x) {
 unsigned float_twice(unsigned uf) {
 
 	int neg_int = 0x80000000;
-
+	unsigned overflow_risk;
 	if (uf == neg_int || uf == 0){
 		return uf;
 	}
 
-	unsigned overflow_risk = (!((uf>>23)&0xff));
+	overflow_risk = (!((uf>>23)&0xff));
 
 	if (((uf >> 23) & 0xFF) == 0xFF){
 		return uf;
